@@ -85,6 +85,13 @@ declare namespace cpy {
 		readonly ignoreJunk?: boolean;
 
 		/**
+		Follows (a.k.a dereference in other lib) any symlinks in source.
+
+		@default false
+		*/
+		readonly followSymlinks?: boolean;
+
+		/**
 		Function to filter files to copy.
 
 		Receives a source file object as the first argument.

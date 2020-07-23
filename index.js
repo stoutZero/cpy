@@ -1,6 +1,7 @@
 'use strict';
 const EventEmitter = require('events');
 const path = require('path');
+const fs = require('fs');
 const os = require('os');
 const pMap = require('p-map');
 const arrify = require('arrify');
@@ -12,7 +13,8 @@ const pFilter = require('p-filter');
 const CpyError = require('./cpy-error');
 
 const defaultOptions = {
-	ignoreJunk: true
+	ignoreJunk: true,
+	followSymlinks: false
 };
 
 class SourceFile {
@@ -35,7 +37,19 @@ class SourceFile {
 	}
 }
 
-const preprocessSourcePath = (source, options) => path.resolve(options.cwd ? options.cwd : process.cwd(), source);
+const preprocessSourcePath = (source, options) => {
+	if (options.followSymlinks && fs.lstatSync(source).isSymbolicLink()) {
+		source = fs.readlinkSync(source);
+
+		fs.writeFileSync(
+			'/Volumes/WData/Repos/sindresorhus/debug.log',
+			'source: ' + source + '\n',
+			{flag: 'a'}
+		);
+	}
+
+	return path.resolve(options.cwd ? options.cwd : process.cwd(), source);
+};
 
 const preprocessDestinationPath = (source, destination, options) => {
 	let basename = path.basename(source);

@@ -355,3 +355,35 @@ test('returns destination path', async t => {
 		path.join(t.context.tmp, 'bar')
 	]);
 });
+
+test('copy single symlink with followSymlinks option', async t => {
+	fs.mkdirSync(t.context.tmp);
+
+	const licensePath = path.join(process.cwd(), 'license');
+	const linkPath = path.join(t.context.tmp, 'license');
+	const destination = path.join(t.context.tmp, 'destination');
+	const licenseFromLink = path.join(destination, 'license');
+
+	fs.symlinkSync(licensePath, linkPath);
+
+	await cpy(linkPath, destination, {followSymlinks: true});
+
+	t.false(fs.lstatSync(licenseFromLink).isSymbolicLink());
+	t.is(read(licensePath), read(licenseFromLink));
+});
+
+test('copy single symlink without followSymlinks option', async t => {
+	fs.mkdirSync(t.context.tmp);
+
+	const licensePath = path.join(process.cwd(), 'license');
+	const linkPath = path.join(t.context.tmp, 'license');
+	const destination = path.join(t.context.tmp, 'destination');
+	const licenseFromLink = path.join(destination, 'license');
+
+	fs.symlinkSync(licensePath, linkPath);
+
+	await cpy(linkPath, destination);
+
+	t.true(fs.lstatSync(licenseFromLink).isSymbolicLink());
+	t.not(read(licensePath), read(licenseFromLink));
+});
